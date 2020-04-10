@@ -192,11 +192,7 @@
         <xsl:variable name="pluginManifestJson" select="."/>
         <div id="highlightedPluginManifest"></div>
         <link rel="stylesheet"
-            href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/default.min.css"/>
-        <script
-          src="https://code.jquery.com/jquery-1.12.4.min.js"
-          integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-          crossorigin="anonymous"></script>
+            href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/arduino-light.min.css"/>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
             <script type="text/javascript">
                 var manifest = <xsl:value-of select="$pluginManifestJson"/>;
