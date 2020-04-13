@@ -2344,8 +2344,9 @@
 		background-color: black;
 		background-position: top left;
 		background-blend-mode: difference;
-		background-size: 3em 6em;
+		background-size: cover;
 		background-repeat: repeat;
+        background-image: url(../img/header.jpg)
 	}
 
 			#header header {

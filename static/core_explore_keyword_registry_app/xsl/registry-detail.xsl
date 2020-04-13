@@ -195,9 +195,20 @@
             href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/arduino-light.min.css"/>
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
             <script type="text/javascript">
-                var manifest = <xsl:value-of select="$pluginManifestJson"/>;
-                var json = hljs.highlight('json', JSON.stringify(manifest, null, 4));
-                $('#highlightedPluginManifest').html("<pre><code>" + json.value + "</code></pre>");
+                var defer_manifest_highlight = function(){
+                    var manifest = <xsl:value-of select="$pluginManifestJson"/>;
+                    var json = hljs.highlight('json', JSON.stringify(manifest, null, 4));
+                    $('#highlightedPluginManifest').html("<pre><code>" + json.value + "</code></pre>");
+                };
+                var onjQueryReady = function(method) {
+                    if (window.jQuery){
+                        method();
+                    }
+                    else{
+                        setTimeout(function() { onjQueryReady(method) } , 50);
+                    }
+                };
+                onjQueryReady(defer_manifest_highlight);
             </script>
     </xsl:template>    
     
