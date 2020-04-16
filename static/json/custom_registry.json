@@ -7,6 +7,17 @@
 	"type": "all",
     "sort": 0
   },
+  "Plugin": {
+    "title": "Plugin",
+    "icon": "fa-cube",
+    "icon_color": "#79B320",
+    "display_icon": true,
+    "description": "A WIPP plugin.",
+    "role_choice": "Plugin",
+    "role_type": "Plugin",
+    "type": "resource",
+    "sort": 1
+  },
   "Dataset": {
     "title": "Dataset",
     "icon": "fa-database",
@@ -16,7 +27,7 @@
     "role_choice": "Dataset",
     "role_type": "Dataset",
     "type": "resource",
-    "sort": 6,
+    "sort": 2,
     "refinements": ["unspecified Dataset"]
   },
   "WebSite": {
@@ -28,18 +39,7 @@
     "role_choice": "WebSite",
     "role_type": "Web Site: InteractiveResource: Portal",
     "type": "resource",
-    "sort": 8,
+    "sort": 3,
     "refinements": ["Informational"]
-  },
-  "Plugin": {
-    "title": "Plugin",
-    "icon": "fa-cube",
-    "icon_color": "#79B320",
-    "display_icon": true,
-    "description": "A WIPP plugin.",
-    "role_choice": "Plugin",
-    "role_type": "Plugin",
-    "type": "resource",
-    "sort": 10
   }
 }

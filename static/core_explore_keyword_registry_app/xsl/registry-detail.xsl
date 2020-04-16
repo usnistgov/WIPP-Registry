@@ -84,7 +84,7 @@
 							<xsl:when test="( (contains($name, 'URL')) or (starts-with($value, 'https://')) or (starts-with($value, 'http://')) )">
 								<a target="_blank" href="{$value}"><xsl:value-of select="$value"/></a>
 							</xsl:when>
-                            <xsl:when test="$name='pluginManifest'">
+                            <xsl:when test="$name='pluginManifestContent'">
 								<xsl:call-template name="jsonDisplay">
 <!--                                  <xsl:with-param name="pluginManifestJson" select="$value"/>-->
                                </xsl:call-template>
