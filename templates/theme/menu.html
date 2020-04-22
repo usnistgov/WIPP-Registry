@@ -8,6 +8,9 @@
                 <img src="{% static "img/logo-wipp.svg" %}"  alt="Web Image Processing Pipelines (WIPP)" style="height:2.5em;margin:0;padding:0;margin-top:-0.25em;"/>
             </a>
         </li>
+        <li>
+            {% include 'core_elasticsearch_app/search_box.html' %}
+        </li>
         {% block navigation_menu %}
             {% generate_menu %}
 
