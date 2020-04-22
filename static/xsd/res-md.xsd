@@ -471,7 +471,7 @@
                   <xs:element name="PluginManifestURL" type="xs:string">
                     <xs:annotation>
                       <xs:appinfo>
-                        <label>Plugin manifest URL</label>
+                        <label>URL</label>
                       </xs:appinfo>
                       <xs:documentation>
                         a label that indicates the plugin manifest's URL
@@ -482,7 +482,7 @@
                     <xs:annotation>
                       <xs:appinfo>
                         <module>module-text-area</module>
-                        <label>Plugin manifest content</label>
+                        <label>Content</label>
                         <placeholder>Enter JSON content</placeholder>
                         <tooltip>A plugin manifest's JSON content</tooltip>
                       </xs:appinfo>
