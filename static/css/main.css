@@ -1978,6 +1978,7 @@
 	input[type="password"],
 	input[type="email"] {
 		line-height: 1em;
+		margin-bottom: .5em;
 	}
 
 	label {
@@ -1985,7 +1986,6 @@
 		color: inherit;
 		font-weight: 600;
 		line-height: 1.75em;
-		margin-bottom: 0.5em;
 	}
 
 	::-webkit-input-placeholder {
@@ -2418,8 +2418,11 @@
 				}
 
 				#nav > ul > li:hover a {
+					color: white;
+				}
+
+				#nav > ul > li:hover a.btn-custom {
 					color: black;
-					font-weight: 600;
 				}
 
 				#nav > ul > li.current {
@@ -2473,6 +2476,11 @@
   padding-left: 2em;
 }
 
+#nav > ul > li {
+  text-align:center;
+  /*width: 175px;*/ /* Removed by NIST */
+}
+
 #nav > ul > #cdcs-main > a {
   margin-bottom: 0;
 }
@@ -2482,7 +2490,7 @@
   margin-top: -0.25em;
 }
 
-.cdcs-menu__item {
+.cdcs-menu-item {
   list-style: none;
 }
 
@@ -2524,8 +2532,8 @@
 			}
 
 			.dropotron > li:hover > a {
-                color: black;
-                font-weight: 600;
+                color: white;
+                /*font-weight: 600;*/ /* Removed by NIST */
             }
 
 		.dropotron.level-0 {
@@ -2603,11 +2611,6 @@
 
 /* Footer */
 
-	#footer {
-		/*padding: 4em 0 8em 0;*/
-		padding: 1em 0 3em 0;
-	}
-
 		#footer a {
 			color: inherit;
 			border-bottom-color: rgba(71, 71, 71, 0.25);
@@ -2637,7 +2640,7 @@
 
 		#footer .copyright {
 			color: #999;
-			margin-top: 1.5em;
+			margin-top: .5em;
 			text-align: center;
 			font-size: 0.9em;
 		}
@@ -2913,28 +2916,9 @@
 					z-index: 2;
 				}
 
-					#titleBar .toggle:before {
-						-moz-osx-font-smoothing: grayscale;
-						-webkit-font-smoothing: antialiased;
-						font-family: FontAwesome;
-						font-style: normal;
-						font-weight: normal;
-						text-transform: none !important;
-					}
-
-					#titleBar .toggle:before {
-						content: '\f0c9';
-						display: block;
-						height: 44px;
-						text-align: center;
-						width: 44px;
-						color: #fff;
-						opacity: 0.5;
-					}
-
-					/*#titleBar .toggle:active:before {
-						opacity: 0.75;
-					}*/
+                /*#titleBar .toggle:active:before {
+                    opacity: 0.75;
+                }*/
 
 			#navPanel {
 				background-color: #1f1f1f;

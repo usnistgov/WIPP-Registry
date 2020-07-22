@@ -19,6 +19,17 @@
         {% endblock %}
 
         <li class="nested">
+            <a href="#">
+                Help <i class="fa fa-caret-down"></i>
+            </a>
+            <ul>
+                {% generate_menu %}
+                {% for item in menus.help %}
+                    <li><a href="{{ item.url }}" class="cdcs-menu-item">{% if item|get_attribute:'icon' %}<i class="fa fa-{{ item.icon }}"></i>{% endif %} {{ item.title }}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li class="nested">
             {% if user.is_authenticated %}
             <a href="#" class="btn-custom">
                 <i class="fa fa-user"></i> {{ user }} <i class="fa fa-chevron-down"></i>
@@ -44,11 +55,11 @@
                 {% endif %}
                 <li class="divider"></li>
                 <li><a href="{% url 'swagger_view' %}">Rest API</a></li>
-                <li><a href="{% url 'core_main_app_logout' %}"><i class="fa fa-sign-out"></i> Logout</a></li>
+                <li><a href="{% url 'core_main_app_logout' %}"><i class="fa fa-sign-out-alt"></i> Logout</a></li>
             </ul>
             {% else %}
                 <a href="{% url 'core_main_app_login' %}" class="btn-custom">
-                    <i class="fa fa-sign-in"></i> Log In / Sign Up
+                    <i class="fa fa-sign-in-alt"></i> Log In / Sign Up
                 </a>
             {% endif %}
         </li>

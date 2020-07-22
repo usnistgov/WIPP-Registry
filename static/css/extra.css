@@ -1,7 +1,36 @@
+/* Bootstrap overide */
+.btn.btn-primary {
+    background-color: #007ac1 !important;
+    border-color: #565656;
+}
+
+.btn.btn-primary:hover {
+    background-color: #005f96 !important;
+}
+
+.btn.btn-secondary {
+    background-color: #f9f9f9 !important;
+    border-color: #d4d4d4 !important;
+    color: #313131 !important;
+}
+
+.btn.btn-secondary:hover {
+    background-color: #e2e2e2 !important;
+}
+
+.modal-footer {
+  justify-content: space-between !important;
+  padding: .75rem 0 .75rem 0;
+}
+
+.save-registry-button-container:parent {
+    justify-content: center !important;
+}
+
 #content {
+    width: calc(100% - 3em);
     background-color: #fff;
-    margin: 0 1.5em;
-    padding: 1.5em;
+    margin: 1px 1.5em 0 1.5em;
     border-bottom-right-radius: 30px;
     border-bottom-left-radius: 30px;
 }
@@ -17,4 +46,14 @@
 .tools-dropdown {
     float: right;
     padding-left: 35px;
+}
+
+.page-item.active .page-link {
+    background-color: #007ac1 !important;
+    border-color: #565656;
+}
+
+.errorlist {
+    color: red;
+    margin-bottom: .1em;
 }
