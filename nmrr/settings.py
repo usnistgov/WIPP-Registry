@@ -63,6 +63,7 @@ INSTALLED_APPS = (
     "menu",
     "tz_detect",
     "defender",
+    "corsheaders",
     # Core apps
     "core_main_app",
     "core_main_registry_app",
@@ -93,6 +94,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = (
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -107,6 +109,7 @@ MIDDLEWARE = (
 )
 
 ROOT_URLCONF = "nmrr.urls"
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
