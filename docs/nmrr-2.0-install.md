@@ -1,11 +1,11 @@
-# NMRR 2.0 Installation Process
-10/11/2018
+# WIPP Registry Installation Process
+07/29/2020
 
 ## INTRODUCTION
 
-* This document describes a step by step installation process for installing NMRR 2.0 using familiar `pip install` processes through the Python Packaging Index (PyPI).
+* This document describes a step by step installation process for installing WIPP Registry (based on NMRR) using familiar `pip install` processes through the Python Packaging Index (PyPI).
 
-* These instructions support the manual installation process for NMRR software version 2.0 (a.k.a., __nmrr__ located at https://github.com/usnistgov/nnmrr ).
+* These instructions support the manual installation process for WIPP Registry software version 1.0 (located at https://github.com/usnistgov/nnmrr ).
 
 * More information about the Configurable Data Curation System (CDCS) of modular applications exists in the form of a [system manual](https://cdcs.nist.gov/cdcs-documentation/index.html) at http://cdcs.nist.gov .
 
@@ -112,10 +112,10 @@
 ###	1. Install supporting applications on your host system.
 
 * Python 3.6.8: https://www.anaconda.com/distribution/ (choose python 3.x)
-* MongoDB 3.4.1: https://www.mongodb.com/download-center#community
+* MongoDB 4.0.3: https://www.mongodb.com/download-center#community
 * Redis 5.0: https://redis.io/download
 * Celery    : NOTE: This is installed below via `pip install`.
-* gettext   : This utility is necessary for supporting internationalization in NMRR 2.0 systems >= NMRR 2.0 beta1.
+* gettext   : 
     - On Linux,
       - $$ `apt-get install gettext`
     -On Windows,
@@ -164,12 +164,12 @@ $$ python -m pip install --upgrade pip
 
 #### Download, extract, and configure nmrr from git repository.
 
-* Download https://github.com/usnistgov/nnmrr/archive/master.zip to the <install_path>\ directory.
-* Extract nmrr-master.zip to form the following base installation directory: <install_path>\nmrr-master\ .
+* Download https://github.com/usnistgov/WIPP-Registry/archive/wipp-registry.zip to the <install_path>\ directory.
+* Extract WIPP-Registry-wipp-registry.zip to form the following base installation directory: <install_path>\WIPP-Registry-wipp-registry\ .
 * Then move into that base install directory.
 
 ```
-$$ cd nmrr-master
+$$ cd WIPP-Registry-wipp-registry
 ```
 
 #### Create configuration file directory for MongoDB.
@@ -184,10 +184,10 @@ $$ mkdir conf
 $$ mkdir data\db
 ```
 
-#### Create <install_path>\nmrr-master\conf\mongodb.conf file with the following content:
+#### Create <install_path>\WIPP-Registry-wipp-registry\conf\mongodb.conf file with the following content:
 
 * NOTE: This instruction asks the user to:
-	1. Create a new file, mongodb.conf, in the <install_path>\nmrr-master\conf\ directory.
+	1. Create a new file, mongodb.conf, in the <install_path>\WIPP-Registry-wipp-registry\conf\ directory.
 	2. Ensure that the given file has the following content.
 	3. Save that file as the primary MongoDB configuration file.
 
@@ -199,7 +199,7 @@ net:
 security:
    authorization: enabled
 storage:
-   dbPath: <install_path>/nmrr-master/data/db
+   dbPath: <install_path>/WIPP-Registry-wipp-registry/data/db
 ```
 
 * Example:
@@ -210,7 +210,7 @@ net:
 security:
    authorization: enabled
 storage:
-   dbPath: c:/nmrr-2.0/nmrr-master/data/db
+   dbPath: c:/nmrr-2.0/WIPP-Registry-wipp-registry/data/db
 ```
 
 #### Install NMRR supporting and core software packages.
@@ -239,12 +239,12 @@ $ cmd.exe
 * Command:
 ```
 $ workon <nmrr_virtual_environment_name>
-$$ cd <install_path>\nmrr-master\
+$$ cd <install_path>\WIPP-Registry-wipp-registry\
 ```
 * Example:
 ```
 $ workon nmrr-2.0_env
-$$ cd <install_path>\nmrr-master\
+$$ cd <install_path>\WIPP-Registry-wipp-registry\
 ```
 
 #### Create MongoDB administrative user.
@@ -327,7 +327,7 @@ $$ mongo --port 27017 -u "mdb_admin_user" -p "mdb_admin_pwd" --authenticationDat
 	* From within MongoDB's shell, type (or copy/paste!) each line, hitting the <ENTER> key after each one.
 	* When done entering these commands, the user will be logged out from MongoDB.
 
-#### Edit and save <install_path>\nmrr-master\nmrr\settings.py file.
+#### Edit and save <install_path>\WIPP-Registry-wipp-registry\nmrr\settings.py file.
 
 * Original settings.py settings:
 ```
@@ -339,7 +339,7 @@ $$ mongo --port 27017 -u "mdb_admin_user" -p "mdb_admin_pwd" --authenticationDat
 
 	* Command:
 		* Enter your own mongodb non-administrative username and password here. See the example below.
-			* Edit <install_path>\nmrr-master\nmrr\settings.py
+			* Edit <install_path>\WIPP-Registry-wipp-registry\nmrr\settings.py
 			* Change MONGO_USER and MONGO_PASSWORD settings to your own mongodb non-administrative username and password.
 
 	```
@@ -394,7 +394,7 @@ $$ celery -A nmrr worker -l info -Ofair --purge
 ###	5. Open terminal window #3 and perform the last set of installation commands.
 
 ```
-$ cd <install_path>\nmrr-master\
+$ cd <install_path>\WIPP-Registry-wipp-registry\
 $ workon nmrr-2.0_env
 $$ python manage.py migrate auth
 $$ python manage.py migrate

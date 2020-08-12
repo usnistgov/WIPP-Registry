@@ -4,15 +4,14 @@ This system allows for the registration of resources for the [WIPP - Web Image P
 
 The WIPP Registry software was developed by the National Institute of Standards and Technology (NIST) and is based on the NIST [CDCS](https://github.com/usnistgov/cdcs) and [NMRR](https://github.com/usnistgov/nmrr) projects.
 
-## Installation
-To install and run the Registry on your machine, please follow installation instructions located here: https://github.com/usnistgov/WIPP-Registry/blob/wipp-registry/docs/nmrr-2.0-install.md
+## Installation (development)
+To install and run the WIPP Registry on your machine, please follow installation instructions located here: https://github.com/usnistgov/WIPP-Registry/blob/wipp-registry/docs/nmrr-2.0-install.md
 
 - Recommended Internet Browser: Google Chrome/Safari.
 
-## Deployment
-To deploy the Registry, please refer to the following documents:
-- https://docs.djangoproject.com/en/1.11/howto/deployment/
-- https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+## Docker Deployment (recommended)
+To build and deploy Docker containers for the WIPP Registry, please refer to the following repository:
+https://github.com/usnistgov/WIPP-Registry-docker
 
 ## Disclaimer
 
