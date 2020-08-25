@@ -349,16 +349,16 @@ PASSWORD_MAX_OCCURRENCE = None
 SAML2_AUTH = {
     # Metadata is required, choose either remote url or local file path. Here an example is provided for Keycloak.
     'METADATA_AUTO_CONF_URL': 'http://localhost:8081/auth/realms/wipp-registry-realm/protocol/saml/descriptor',
-    #'METADATA_LOCAL_FILE_PATH': '/srv/wipp-registry/federationmetadata.xml',
+    #'METADATA_LOCAL_FILE_PATH': '/srv/curator/federationmetadata.xml',
  
     # Optional settings below
     'DEFAULT_NEXT_URL': '/',  # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
     'CREATE_USER': False, # Create a new Django user when a new user logs in. Defaults to True.
-    'ATTRIBUTES_MAP': {  # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-        'email': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
-        'username': 'http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname',
-        'first_name': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname',
-        'last_name': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname',
+    'ATTRIBUTES_MAP': {  # Change to corresponding SAML2 userprofile attributes. Here an example is provided for Keycloak, with email, first_name and last_name added from built-in Mappers in the client, and username as a custom Mapper.
+        'email': 'urn:oid:1.2.840.113549.1.9.1',
+        'username': 'urn:oid:0.9.2342.19200300.100.1.1',
+        'first_name': 'urn:oid:2.5.4.42',
+        'last_name': 'urn:oid:2.5.4.4',
     },
     'ASSERTION_URL': 'http://localhost:8000', # Custom URL to validate incoming SAML requests against
     'ENTITY_ID': 'http://localhost:8000/saml2_auth/acs/', # Populates the Issuer element in authn request

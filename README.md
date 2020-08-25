@@ -1,8 +1,10 @@
-# WIPP Registry
+# WIPP Registry - SAML
 
 This system allows for the registration of resources for the [WIPP - Web Image Processing Pipeline project](https://github.com/usnistgov/WIPP), bridging the gap between existing resources and the end users. The WIPP Registry functions as a centrally located service, making the registered information available for research to the WIPP community, such as WIPP plugins, test datasets and informational websites about the WIPP framework.
 
 The WIPP Registry software was developed by the National Institute of Standards and Technology (NIST) and is based on the NIST [CDCS](https://github.com/usnistgov/cdcs) and [NMRR](https://github.com/usnistgov/nmrr) projects.
+
+This branch enables SAML authentication.
 
 ## Installation (development)
 To install and run the WIPP Registry on your machine, please follow installation instructions located here: https://github.com/usnistgov/WIPP-Registry/blob/wipp-registry/docs/nmrr-2.0-install.md
