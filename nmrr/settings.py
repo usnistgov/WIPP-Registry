@@ -64,6 +64,7 @@ INSTALLED_APPS = (
     "tz_detect",
     "defender",
     "corsheaders",
+    "django_saml2_auth",
     # Core apps
     "core_main_app",
     "core_main_registry_app",
@@ -343,6 +344,28 @@ PASSWORD_MIN_NUMBERS = 0
 PASSWORD_MIN_SYMBOLS = 0
 # Specifies the maximum amount of consecutive characters allowed in passwords.
 PASSWORD_MAX_OCCURRENCE = None
+
+# SAML2 AUTH settings
+SAML2_AUTH = {
+    # Metadata is required, choose either remote url or local file path. Here an example is provided for Keycloak.
+    'METADATA_AUTO_CONF_URL': 'http://localhost:8081/auth/realms/wipp-registry-realm/protocol/saml/descriptor',
+    #'METADATA_LOCAL_FILE_PATH': '/srv/wipp-registry/federationmetadata.xml',
+ 
+    # Optional settings below
+    'DEFAULT_NEXT_URL': '/',  # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
+    'CREATE_USER': False, # Create a new Django user when a new user logs in. Defaults to True.
+    'ATTRIBUTES_MAP': {  # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
+        'email': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
+        'username': 'http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname',
+        'first_name': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname',
+        'last_name': 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname',
+    },
+    'ASSERTION_URL': 'http://localhost:8000', # Custom URL to validate incoming SAML requests against
+    'ENTITY_ID': 'http://localhost:8000/saml2_auth/acs/', # Populates the Issuer element in authn request
+    'NAME_ID_FORMAT': 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient', # Sets the Format property of authn NameIDPolicy element
+    'USE_JWT': False,
+    'SAML_CLIENT_SETTINGS': False
+}
 
 # ===============================================
 # Website configuration

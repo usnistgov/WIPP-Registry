@@ -4,3 +4,4 @@ kombu==4.3.0
 Django==2.2.13
 mongoengine==0.18.2
 django-cors-headers==3.4.0
+django-saml2-auth==1.0.2b1
