@@ -2,6 +2,7 @@ import logging
 
 from django.shortcuts import render
 
+from core_main_app.access_control.exceptions import AccessControlError
 from nmrr.settings import DATA_SORTING_FIELDS
 
 logger = logging.getLogger(__name__)
@@ -34,30 +35,37 @@ def tiles(request):
         )
         from core_main_app.commons import exceptions as exceptions
 
-        # create Query
-        query = Query(user_id=str(request.user.id), templates=[])
+        try:
+            # create Query
+            query = Query(user_id=str(request.user.id), templates=[])
 
-        # add local data source to the query
-        add_local_data_source(request, query)
+            # add local data source to the query
+            add_local_data_source(request, query)
 
-        # set visibility
-        query_api.set_visibility_to_query(query)
+            # set visibility
+            query_api.set_visibility_to_query(query, request.user)
 
-        # upsert the query
-        query_api.upsert(query)
+            # upsert the query
+            query_api.upsert(query, request.user)
 
-        # add information in context to populate keyword form
-        context.update(
-            {
-                "query_id": str(query.id),
-                "user_id": query.user_id,
-                "order_by_field": ",".join(DATA_SORTING_FIELDS),
-            }
-        )
+            # add information in context to populate keyword form
+            context.update(
+                {
+                    "query_id": str(query.id),
+                    "user_id": query.user_id,
+                    "order_by_field": ",".join(DATA_SORTING_FIELDS),
+                }
+            )
+        except AccessControlError as ace:
+            logger.error(
+                "Error while initializing the homepage query: {0}".format(str(ace))
+            )
 
         try:
             # Get current template
-            template = template_registry_api.get_current_registry_template()
+            template = template_registry_api.get_current_registry_template(
+                request=request
+            )
             # Get type refinement
             refinement = refinement_api.get_by_template_hash_and_by_slug(
                 template_hash=template.hash, slug="type"
@@ -72,9 +80,9 @@ def tiles(request):
                 category_api.get_all_categories_ids_from_name_and_refinement_id
             )
 
-            custom_resources = custom_resource_api.get_all_of_current_template().order_by(
-                "sort"
-            )
+            custom_resources = custom_resource_api.get_all_of_current_template(
+                request=request
+            ).order_by("sort")
 
             for custom_resource in custom_resources:
                 if (
