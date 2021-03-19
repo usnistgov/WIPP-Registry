@@ -127,6 +127,7 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "tz_detect.middleware.TimezoneMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
