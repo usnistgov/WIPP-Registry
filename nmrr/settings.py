@@ -425,7 +425,7 @@ if SERVER_URI.lower().startswith("https"):
     X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # APM
-MONITORING_SERVER_URI = os.environ["MONITORING_SERVER_URI"]
+MONITORING_SERVER_URI = os.environ["MONITORING_SERVER_URI"] if "MONITORING_SERVER_URI" in os.environ else None
 if MONITORING_SERVER_URI:
     ELASTIC_APM = {
         "SERVICE_NAME": os.environ["SERVER_NAME"],
