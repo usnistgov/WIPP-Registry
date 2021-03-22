@@ -57,3 +57,15 @@
     color: red;
     margin-bottom: .1em;
 }
+
+#data-title { /* Remove data title from data page */
+    visibility: hidden;
+    height: 0em;
+}
+/* End Bootstrap overide */
+
+/* Fontawesome overide */
+.fa span {
+    font-family: 'Source Sans Pro', sans-serif !important;
+}
+/* End fontawesome overide */

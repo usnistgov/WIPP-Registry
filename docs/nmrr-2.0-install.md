@@ -17,15 +17,15 @@
 * To apply the given PyPI process to a Linux environment to get a basic installation going, there are only slight modifications to should be performed.
 * Specific differences you should be aware of when installing on Linux or Mac are as follows:
 
-  1. **Suppporting Utilities:** The specific supporting utilities that are downloaded (i.e., redis, celery, mongo) - the install links for all those point to generic locations where you should just choose the ones appropriate to your platform.
+  1. **Supporting Utilities:** The specific supporting utilities that are downloaded (i.e., redis, celery, mongo) - the install links for all those point to generic locations where you should just choose the ones appropriate to your platform.
 
   2. **Virtual Environment:** The specific python virtual environment may be varied, but it doesn't have to be.
-     1. That is, you can install `mkvirtualenv` on Linux or Mac. So, those commands should remain idential.
+     1. That is, you can install `Anaconda` on Windows, Linux or Mac. So, those commands should remain identical.
      2. If you decide to use a different one, just substitute any desired python virtual environment application and the instructions inside of it should remain the same.
      3. If you use an alternative application for creating and using python virtual environments, then merely use the appropriate equivalent commands for each command involving the python virtual environment.
      4. Mostly, the commands used for the python virtual environment have to do with:
-       1. creating it (`mkvirtualenv`),
-       2. activating it (`workon <nmrr_virtual_environment_name>`),
+       1. creating it (`conda create`),
+       2. activating it (`conda activate <nmrr_virtual_environment_name>`),
        3. deactivating it (`deactivate <nmrr_virtual_environment_name>`).
          * NOTE: Corresponding commands for related utilities often use very similar or identical commands.
 
@@ -59,7 +59,7 @@
 | NMRR application port number               | 8000                                         |
 | NMRR virtual environment name              | nmrr-2.0_env                            |
 | NMRR Superuser username                    | mgi_superuser                                |
-| NMRR Superuser email                       | user_email@institution.com                   |
+| NMRR Superuser email                       | user_email@example.com                   |
 | NMRR Superuser password                    | mgi_superuser_pwd                            |
 | MongoDB administrative username            | mdb_admin_user                               |
 | MongoDB administrative password            | mdb_admin_pwd                                |
@@ -84,7 +84,7 @@
 | MongoDB administrative password            | `<mongodb_admin_password>`                   |
 | MongoDB non-administrative username        | `<mongodb_nonadmin_username>`                |
 | MongoDB non-administrative password        | `<mongodb_nonadmin_password>`	            |
-| Redis configuration file                   | `<redis_configuratiaon_filename>`	        |
+| Redis configuration file                   | `<redis_configuration_filename>`	            |
 
 ### Assumptions
 
@@ -115,7 +115,7 @@
 * MongoDB 4.0.3: https://www.mongodb.com/download-center#community
 * Redis 5.0: https://redis.io/download
 * Celery    : NOTE: This is installed below via `pip install`.
-* gettext   : 
+* gettext   : This utility is necessary for supporting internationalization in NMRR 2.0 systems >= NMRR 2.0 beta1.
     - On Linux,
       - $$ `apt-get install gettext`
     -On Windows,
@@ -133,28 +133,30 @@
 $ cmd.exe
 ```
 
-#### Install mkvirtualenv
+#### Install Anaconda
+
 
 * NOTE: This enables you to install the NMRR software in Python virtual environments.
 
-* Command:
+- Download and Install [Anaconda](https://www.anaconda.com/distribution/) for the Python 3.x distribution
+- Start the Anaconda Navigator and:
+   - click on "Environment",
+   - then click on "base (root)",
+   - and "Open Terminal".
+
+
+* Then run the following commands:
 ```
-$ pip install virtualenvwrapper
-$ mkdir <install_path>\
-$ cd <install_path>\
-$ mkvirtualenv <nmrr_virtual_environment_name>
+$(base) conda create -n <nmrr_virtual_environment_name> python=<python_version>
+$(base) conda activate <nmrr_virtual_environment_name>
 ```
 * Example:
 ```
-$ pip install virtualenvwrapper
-$ mkdir c:\nmrr-2.0\
-$ cd c:\nmrr-2.0\
-$ mkvirtualenv nmrr-2.0_env
+$(base) conda create -n nmrr_env python=3.6.8
+$(base) conda activate nmrr_env
+$(nmrr_env)
 ```
 
-* NOTE: This __mkvirtualenv__ command:
-	* Creates a new __Python virtual environment__: __nmrr-2.0_env__.
-	* Automatically puts you into the virtual-environment after creating it.
 
 #### Install the latest version of pip installation utility inside the newly-created virtual-environment.
 
@@ -238,12 +240,12 @@ $ cmd.exe
 
 * Command:
 ```
-$ workon <nmrr_virtual_environment_name>
+$ conda activate <nmrr_virtual_environment_name>
 $$ cd <install_path>\WIPP-Registry-wipp-registry\
 ```
 * Example:
 ```
-$ workon nmrr-2.0_env
+$ conda activate nmrr_env
 $$ cd <install_path>\WIPP-Registry-wipp-registry\
 ```
 
@@ -295,7 +297,7 @@ $$ mongo --port 27017
 	* Enter your own mongodb usernames and passwords for administrative and non-administrative accounts, respectively, here. Please see the example below.
 
 ```
-$$ mongo --port 27017 -u "<mongodb_admin_username>" -p "<mongodb_admin_username>" --authenticationDatabase admin
+$$ mongo --port 27017 -u "<mongodb_admin_username>" -p "<mongodb_admin_password>" --authenticationDatabase admin
 	use mgi
 	db.createUser(
 	{
@@ -329,36 +331,90 @@ $$ mongo --port 27017 -u "mdb_admin_user" -p "mdb_admin_pwd" --authenticationDat
 
 #### Edit and save <install_path>\WIPP-Registry-wipp-registry\nmrr\settings.py file.
 
-* Original settings.py settings:
+Some values of the `settings.py` file are set using environment
+variables. Here is a list of expected environment variables:
+
+| Variable | Description |
+| ----------- | ----------- |
+| DJANGO_SECRET_KEY     | [Secret Key](https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/#secret-key) for Django (should be a "large random value") |
+| ALLOWED_HOSTS         | Comma-separated list of hosts (e.g. ALLOWED_HOSTS=127.0.0.1,localhost), see [Allowed Hosts](https://docs.djangoproject.com/en/2.2/ref/settings/#allowed-hosts) for more info.|
+| SERVER_URI            | URI of the server (e.g. for local deployment, http://127.0.0.1:8000) |
+| SERVER_NAME           | Name of the server (e.g. NMRR) |
+| MONGO_HOST            | MongoDB host |
+| MONGO_PORT            | MongoDB port (default port: 27017)|
+| MONGO_USER            | User for MongoDB |
+| MONGO_PASS            | User password for MongoDB |
+| MONGO_DB              | Name of the Mongo database (e.g. nmrr) |
+| POSTGRES_HOST         | Postrges Host |
+| POSTGRES_PORT         | Postgres Port (default port: 5432)|
+| POSTGRES_USER         | User for Postgres |
+| POSTGRES_PASS         | User password for Postgres |
+| POSTGRES_DB           | Name of the Postgres database (e.g. nmrr) |
+| REDIS_HOST            | Redis host |
+| REDIS_PORT            | Redis Port (default port: 6379) |
+| REDIS_PASS            | Password for Redis|
+
+Not all variables are required, depending on the server configuration
+(e.g. if the development server uses a sqlite3 database, instead of
+postgres, environment variables for postgres won't be required).
+For development purposes, custom settings are provided in: `nmrr/dev_settings.py`.
+Those settings also require to set a few environment variables. To do
+so, copy the `.env.dev.example` into a `.env` file at the same location.
+This `.env` should not be pushed to the repository. You can update the
+values of the `.env` with values that work for your own configuration.
+For mongodb:
 ```
-		MONGO_USER     = "mgi_user"
-		MONGO_PASSWORD = "mgi_password"
+MONGO_USER=<mongodb_nonadmin_username>
+MONGO_PASS=<mongodb_nonadmin_password>
+```
+Example:
+```
+MONGO_USER=mdb_user
+MONGO_PASSWORD=mdb_pwd
 ```
 
-* Change to:
+To run django commands, using a custom settings file, you can use the
+following syntax:
+```
+python manage.py <command> --settings=<custom_settings>
+```
+Example: start the server with development settings
+```
+python manage.py runserver --settings=nmrr.dev_settings
+```
+Or set the `DJANGO_SETTINGS_MODULE` environment variable:
+```
+export DJANGO_SETTINGS_MODULE=<custom_settings>
+python manage.py <command>
+```
+Example:
+```
+export DJANGO_SETTINGS_MODULE=nmrr.dev_settings
+python manage.py runserver
+```
 
-	* Command:
-		* Enter your own mongodb non-administrative username and password here. See the example below.
-			* Edit <install_path>\WIPP-Registry-wipp-registry\nmrr\settings.py
-			* Change MONGO_USER and MONGO_PASSWORD settings to your own mongodb non-administrative username and password.
+NOTES:
+- Additional packages are required for development. In your dev
+environment, run the following command to install those packages:
+```
+$$ pip install -r requirements.dev.txt
+```
+- the key differences between the main `settings.py` file and the
+`dev_settings.py` file is that the development version overrides the
+databases setting to use sqlite3 instead of postgres, and sets the
+`DEBUG` setting to `True`.
+- settings for deployment in production can be written the same way
+as the development settings of this repository, by adding and overriding
+the main settings file. Additional information about writing a
+settings file for production can be found here:
+https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-	```
-			MONGO_USER     = "<mongodb_nonadmin_username>"
-			MONGO_PASSWORD = "<mongodb_nonadmin_password>"
-	```
-
-	* Example:
-
-	```
-			MONGO_USER     = "mdb_user"
-			MONGO_PASSWORD = "mdb_pwd"
-	```
 
 #### Start Redis server.
 
 * Command:
 ```
-$$ redis-server <redis_configuratiaon_filename>
+$$ redis-server <redis_configuration_filename>
 ```
 
 * Example:
@@ -395,7 +451,8 @@ $$ celery -A nmrr worker -l info -Ofair --purge
 
 ```
 $ cd <install_path>\WIPP-Registry-wipp-registry\
-$ workon nmrr-2.0_env
+$ conda activate nmrr_env
+
 $$ python manage.py migrate auth
 $$ python manage.py migrate
 $$ python manage.py collectstatic --noinput
@@ -422,7 +479,7 @@ $$ python manage.py createsuperuser
 * Example:
 	* When prompted, fill in the following info:
 		* username      : mgi_superuser
-		* email         : user_email@institution.com
+		* email         : user_email@example.com
 		* password (x2) : mgi_superuser_pwd
 
 #### Run the system.

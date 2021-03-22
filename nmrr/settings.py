@@ -5,8 +5,9 @@ For more information on this file, see
 https://docs.djangoproject.com/en/1.8/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.8/ref/settings/
+https://docs.djangoproject.com/en/2.2/ref/settings/
 """
+from .core_settings import *
 import os
 
 from mongoengine.connection import connect
@@ -19,32 +20,52 @@ from core_main_app.utils.logger.logger_utils import (
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "<secret_key>"
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"] if "DJANGO_SECRET_KEY" in os.environ else None
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",") if "ALLOWED_HOSTS" in os.environ else []
 
-MENU_SELECT_PARENTS = False
+# Databases
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "HOST": os.environ["POSTGRES_HOST"] if "POSTGRES_HOST" in os.environ else None,
+        "PORT": int(os.environ["POSTGRES_PORT"]) if "POSTGRES_PORT" in os.environ else 5432,
+        "NAME": os.environ["POSTGRES_DB"] if "POSTGRES_DB" in os.environ else None,
+        "USER": os.environ["POSTGRES_USER"] if "POSTGRES_USER" in os.environ else None,
+        "PASSWORD": os.environ["POSTGRES_PASS"] if "POSTGRES_PASS" in os.environ else None,
+    }
+}
 
-REGISTRY_XSD_FILENAME = "res-md.xsd"
-""" str: Registry xsd filename used for the initialisation.
-"""
+MONGO_HOST = os.environ["MONGO_HOST"] if "MONGO_HOST" in os.environ else ""
+MONGO_PORT = os.environ["MONGO_PORT"] if "MONGO_PORT" in os.environ else "27017"
+MONGO_DB = os.environ["MONGO_DB"] if "MONGO_DB" in os.environ else ""
+MONGO_USER = os.environ["MONGO_USER"] if "MONGO_USER" in os.environ else ""
+MONGO_PASS = os.environ["MONGO_PASS"] if "MONGO_PASS" in os.environ else ""
+MONGODB_URI = (
+    f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
+)
+connect(MONGO_DB, host=MONGODB_URI)
 
-# If you want to use your own schema, set your schema here
-REGISTRY_XSD_FILEPATH = os.path.join("xsd", REGISTRY_XSD_FILENAME)
-""" str: Registry xsd path used for the initialisation.
-"""
 
-# If you want to use your own configuration file, set your configuration file here
-CUSTOM_REGISTRY_FILE_PATH = os.path.join("json", "custom_registry.json")
-""" str: Custom registry configuration file path used for the initialisation.
-"""
+BROKER_TRANSPORT_OPTIONS = {
+    "visibility_timeout": 3600,
+    "fanout_prefix": True,
+    "fanout_patterns": True,
+}
+REDIS_HOST = os.environ["REDIS_HOST"] if "REDIS_HOST" in os.environ else ""
+REDIS_PORT = os.environ["REDIS_PORT"] if "REDIS_PORT" in os.environ else "6379"
+REDIS_PASS = os.environ["REDIS_PASS"] if "REDIS_PASS" in os.environ else None
+
+if REDIS_PASS:
+    REDIS_URL = f"redis://:{REDIS_PASS}@{REDIS_HOST}:{REDIS_PORT}"
+else:
+    REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 
 # Application definition
 
@@ -63,6 +84,7 @@ INSTALLED_APPS = (
     "menu",
     "tz_detect",
     "defender",
+    "captcha",
     "corsheaders",
     "django_saml2_auth",
     # Core apps
@@ -101,15 +123,14 @@ MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     "defender.middleware.FailedLoginMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "tz_detect.middleware.TimezoneMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
-ROOT_URLCONF = "nmrr.urls"
 CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
@@ -130,20 +151,13 @@ TEMPLATES = [
     },
 ]
 
+ROOT_URLCONF = "nmrr.urls"
+
 WSGI_APPLICATION = "nmrr.wsgi.application"
 
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-    }
-}
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.8/topics/i18n/
+# https://docs.djangoproject.com/en/2.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -158,7 +172,7 @@ USE_TZ = True
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static.prod"
@@ -169,6 +183,105 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = ("static",)
+
+# Password Validators
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 8,
+        },
+    },
+    {
+        "NAME": "core_main_app.commons.validators.UpperCaseLetterCountValidator",
+        "OPTIONS": {
+            "min_uppercase_letters": 1,
+        },
+    },
+    {
+        "NAME": "core_main_app.commons.validators.LowerCaseLetterCountValidator",
+        "OPTIONS": {
+            "min_lowercase_letters": 1,
+        },
+    },
+    {
+        "NAME": "core_main_app.commons.validators.NonAlphanumericCountValidator",
+        "OPTIONS": {
+            "min_nonalphanumeric_letters": 1,
+        },
+    },
+    {
+        "NAME": "core_main_app.commons.validators.DigitsCountValidator",
+        "OPTIONS": {
+            "min_digits": 1,
+        },
+    },
+    {
+        "NAME": "core_main_app.commons.validators.MaxOccurrenceCountValidator",
+        "OPTIONS": {
+            "max_occurrence": 5,
+        },
+    },
+]
+
+# Django REST Framework
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+}
+
+# drf-yasg
+SWAGGER_SETTINGS = {
+    "exclude_namespaces": [],  # List URL namespaces to ignore
+    "api_version": "1.1",  # Specify your API's version
+    "api_path": "/",  # Specify the path to your API not a root level
+    "enabled_methods": [  # Specify which methods to enable in Swagger UI
+        "get",
+        "post",
+        "put",
+        "patch",
+        "delete",
+    ],
+    "api_key": "",  # An API key
+    "is_authenticated": False,  # Set to True to enforce user authentication,
+    "is_superuser": False,  # Set to True to enforce admin only access
+    "LOGIN_URL": "core_main_app_login",
+    "LOGOUT_URL": "core_main_app_logout",
+}
+
+# Django Defender
+DEFENDER_REDIS_URL = REDIS_URL
+""" :py:class:`str`: The Redis url for defender.
+"""
+DEFENDER_COOLOFF_TIME = 60
+""" integer: Period of inactivity after which old failed login attempts will be forgotten
+"""
+DEFENDER_LOGIN_FAILURE_LIMIT = 3
+""" integer: The number of login attempts allowed before a record is created for the failed login.
+"""
+DEFENDER_STORE_ACCESS_ATTEMPTS = True
+""" boolean: Store the login attempt to the database.
+"""
+DEFENDER_USE_CELERY = True
+""" boolean: Use Celery to store the login attempt to the database.
+"""
+DEFENDER_LOCKOUT_URL = "/locked"
+""" string: url to the defender error page (defined in core_main_registry_app)
+"""
+
+# Django simple-menu
+MENU_SELECT_PARENTS = False
 
 # Logging
 LOGGING_SERVER = True
@@ -295,253 +408,68 @@ if LOGGING_DB:
         ["console", "logfile-django-db-backend"],
     )
 
+# SSL
 
-MONGO_USER = "mgi_user"
-MONGO_PASSWORD = "mgi_password"
-DB_NAME = "mgi"
-DB_SERVER = "localhost"
-MONGODB_URI = (
-    "mongodb://" + MONGO_USER + ":" + MONGO_PASSWORD + "@" + DB_SERVER + "/" + DB_NAME
-)
-connect(DB_NAME, host=MONGODB_URI)
+if SERVER_URI.lower().startswith("https"):
+    # Activate HTTPS
+    os.environ["HTTPS"] = "on"
 
-# core_main_app settings
-SERVER_EMAIL = ""
-EMAIL_SUBJECT_PREFIX = ""
-USE_EMAIL = False
-ADMINS = [("admin", "admin@example.com")]
-MANAGERS = [("manager", "moderator@example.com")]
+    # Secure cookies
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_AGE = None
+    SESSION_COOKIE_SECURE = True
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    SESSION_COOKIE_AGE = 604800
 
-USE_BACKGROUND_TASK = False
-# FIXME: set a redis password in production
-# REDIS_PASSWORD = 'redispass'
-# REDIS_URL = 'redis://:' + REDIS_PASSWORD + '@localhost:6379/0'
+    # Set x-frame options
+    X_FRAME_OPTIONS = "SAMEORIGIN"
 
-REDIS_URL = "redis://localhost:6379/0"
-BROKER_URL = REDIS_URL
-BROKER_TRANSPORT_OPTIONS = {
-    "visibility_timeout": 3600,
-    "fanout_prefix": True,
-    "fanout_patterns": True,
-}
-CELERY_RESULT_BACKEND = REDIS_URL
-
-# core_website_app settings
-SERVER_URI = "http://localhost:8000"
-
-# Password settings for django.contrib.auth validators
-# Specifies the minimum length for passwords.
-PASSWORD_MIN_LENGTH = 5
-# Specifies the minimum amount of required letters in a password.
-PASSWORD_MIN_LETTERS = 0
-# Specifies the minimum amount of required uppercase letters in a password.
-PASSWORD_MIN_UPPERCASE_LETTERS = 0
-# Specifies the minimum amount of required lowercase letters in a password.
-PASSWORD_MIN_LOWERCASE_LETTERS = 0
-# Specifies the minimum amount of required numbers in a password.
-PASSWORD_MIN_NUMBERS = 0
-# Specifies the minimum amount of required symbols in a password.
-PASSWORD_MIN_SYMBOLS = 0
-# Specifies the maximum amount of consecutive characters allowed in passwords.
-PASSWORD_MAX_OCCURRENCE = None
+# APM
+MONITORING_SERVER_URI = os.environ["MONITORING_SERVER_URI"]
+if MONITORING_SERVER_URI:
+    ELASTIC_APM = {
+        "SERVICE_NAME": os.environ["SERVER_NAME"],
+        "SERVER_URL": MONITORING_SERVER_URI,
+        # Use if APM Server requires a token
+        # 'SECRET_TOKEN': '',
+    }
+    if "elasticapm.contrib.django" not in INSTALLED_APPS:
+        INSTALLED_APPS = INSTALLED_APPS + ("elasticapm.contrib.django",)
+    if "elasticapm.contrib.django.middleware.TracingMiddleware" not in MIDDLEWARE:
+        # Make sure that it is the first middleware in the list.
+        MIDDLEWARE = (
+            "elasticapm.contrib.django.middleware.TracingMiddleware",
+        ) + MIDDLEWARE
+    if "elasticapm.errors" not in LOGGING["loggers"]:
+        # https://www.elastic.co/guide/en/apm/agent/python/current/django-support.html#django-logging
+        # Log errors from the Elastic APM module to the console (recommended)
+        set_generic_logger(LOGGING, "elasticapm.errors", "ERROR", ["console"])
+    if (
+        "elasticapm.contrib.django.context_processors.rum_tracing"
+        not in TEMPLATES[0]["OPTIONS"]["context_processors"]
+    ):
+        TEMPLATES[0]["OPTIONS"]["context_processors"].append(
+            "elasticapm.contrib.django.context_processors.rum_tracing"
+        )
 
 # SAML2 AUTH settings
 SAML2_AUTH = {
     # Metadata is required, choose either remote url or local file path. Here an example is provided for Keycloak.
-    'METADATA_AUTO_CONF_URL': 'http://localhost:8081/auth/realms/wipp-registry-realm/protocol/saml/descriptor',
+    'METADATA_AUTO_CONF_URL': os.environ["SAML_METADATA_CONF_URL"],
     #'METADATA_LOCAL_FILE_PATH': '/srv/curator/federationmetadata.xml',
- 
+
     # Optional settings below
     'DEFAULT_NEXT_URL': '/',  # Custom target redirect URL after the user get logged in. Default to /admin if not set. This setting will be overwritten if you have parameter ?next= specificed in the login URL.
-    'CREATE_USER': False, # Create a new Django user when a new user logs in. Defaults to True.
+    'CREATE_USER': os.environ["SAML_CREATE_USER"], # Create a new Django user when a new user logs in. Defaults to True.
     'ATTRIBUTES_MAP': {  # Change to corresponding SAML2 userprofile attributes. Here an example is provided for Keycloak, with email, first_name and last_name added from built-in Mappers in the client, and username as a custom Mapper.
-        'email': 'urn:oid:1.2.840.113549.1.9.1',
-        'username': 'urn:oid:0.9.2342.19200300.100.1.1',
-        'first_name': 'urn:oid:2.5.4.42',
-        'last_name': 'urn:oid:2.5.4.4',
+        'email': os.environ["SAML_ATTRIBUTES_MAP_EMAIL"],
+        'username': os.environ["SAML_ATTRIBUTES_MAP_USERNAME"],
+        'first_name': os.environ["SAML_ATTRIBUTES_MAP_FIRSTNAME"],
+        'last_name': os.environ["SAML_ATTRIBUTES_MAP_LASTNAME"],
     },
-    'ASSERTION_URL': 'http://localhost:8000', # Custom URL to validate incoming SAML requests against
-    'ENTITY_ID': 'http://localhost:8000/saml2_auth/acs/', # Populates the Issuer element in authn request
-    'NAME_ID_FORMAT': 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient', # Sets the Format property of authn NameIDPolicy element
-    'USE_JWT': False,
-    'SAML_CLIENT_SETTINGS': False
+    'ASSERTION_URL': os.environ["SAML_ASSERTION_URL"], # Custom URL to validate incoming SAML requests against
+    'ENTITY_ID': os.environ["SAML_ENTITY_ID"], # Populates the Issuer element in authn request
+    'NAME_ID_FORMAT': os.environ["SAML_ENTITY_ID"], # Sets the Format property of authn NameIDPolicy element
+    'USE_JWT': os.environ["SAML_USE_JWT"],
+    'SAML_CLIENT_SETTINGS': os.environ["SAML_CLIENT_SETTINGS"]
 }
-
-# ===============================================
-# Website configuration
-# ===============================================
-# Choose from:  black, black-light, blue, blue-light, green, green-light, purple, purple-light, red, red-light, yellow,
-#               yellow-light
-WEBSITE_ADMIN_COLOR = "blue"
-
-WEBSITE_SHORT_TITLE = "WIPP Registry"
-
-DATA_AUTO_PUBLISH = True
-
-# Customization Label
-CUSTOM_DATA = "WIPP Registry"
-CUSTOM_TITLE = "WIPP Plugin Registry"
-CUSTOM_SUBTITLE = "Part of the Web Image Processing Pipelines project"
-CUSTOM_NAME = "WIPP Registry"
-
-DATA_SOURCES_EXPLORE_APPS = ["core_explore_oaipmh_app"]
-
-# FIXME: set desired value before release
-# Lists in data not stored if number of elements is over the limit (e.g. 100)
-SEARCHABLE_DATA_OCCURRENCES_LIMIT = None
-
-SWAGGER_SETTINGS = {
-    "exclude_namespaces": [],  # List URL namespaces to ignore
-    "api_version": "1.1",  # Specify your API's version
-    "api_path": "/",  # Specify the path to your API not a root level
-    "enabled_methods": [  # Specify which methods to enable in Swagger UI
-        "get",
-        "post",
-        "put",
-        "patch",
-        "delete",
-    ],
-    "api_key": "",  # An API key
-    "is_authenticated": False,  # Set to True to enforce user authentication,
-    "is_superuser": False,  # Set to True to enforce admin only access
-    "LOGIN_URL": "core_main_app_login",
-    "LOGOUT_URL": "core_main_app_logout",
-}
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ),
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # )
-}
-
-HOMEPAGE_NB_LAST_TEMPLATES = 6
-
-PARSER_DOWNLOAD_DEPENDENCIES = True
-
-# MENU
-CURATE_MENU_NAME = "Publish resource"
-EXPLORE_MENU_NAME = "Search for resources"
-
-# Can set workspace public
-CAN_SET_WORKSPACE_PUBLIC = False
-
-# CAN SET PUBLIC DATA TO PRIVATE
-CAN_SET_PUBLIC_DATA_TO_PRIVATE = False
-
-# DASHBOARD
-WORKSPACE_DISPLAY_NAME = "workspace"
-
-DEFAULT_DATA_RENDERING_XSLT = os.path.join(
-    "core_main_registry_app", "xsl", "xml2html.xsl"
-)
-
-# Results per page for paginator
-CAN_ANONYMOUS_ACCESS_PUBLIC_DOCUMENT = True
-""" boolean: Can anonymous user access public data
-"""
-
-EXPLORE_ADD_DEFAULT_LOCAL_DATA_SOURCE_TO_QUERY = True
-""" boolean: Do we add the local data source to new queries by default
-"""
-
-SSL_CERTIFICATES_DIR = True
-""" Either a boolean, in which case it controls whether requests verify the server's TLS certificate, 
-or a string, in which case it must be a path to a CA bundle to use.
-"""
-
-XSD_URI_RESOLVER = None
-""" :py:class:`str`: XSD URI Resolver for lxml validation. Choose from:  None, 'REQUESTS_RESOLVER'.
-"""
-
-DATA_SORTING_FIELDS = ["-last_modification_date"]
-""" Array<string>: Default sort fields for the data query. 
-"""
-
-DISPLAY_EDIT_BUTTON = False
-""" boolean: Display the edit button on the result page
-"""
-
-DEFAULT_DATE_TOGGLE_VALUE = False
-""" boolean: Set the toggle default value in the records list
-"""
-DATA_DISPLAYED_SORTING_FIELDS = [
-    {
-        "field": "last_modification_date",
-        "display": "Last updated",
-        "ordering": "-last_modification_date",
-    },
-    {
-        "field": "last_modification_date",
-        "display": "First updated",
-        "ordering": "+last_modification_date",
-    },
-    {"field": "title", "display": "Title (A-Z)", "ordering": "+title"},
-    {"field": "title", "display": "Title (Z-A)", "ordering": "-title"},
-]
-"""The default sorting fields displayed on the GUI, Data model field Array"""
-SORTING_DISPLAY_TYPE = "single"
-"""Result sorting graphical display type ('multi' / 'single')"""
-
-# Configure Django Defender
-DEFENDER_REDIS_URL = REDIS_URL
-""" :py:class:`str`: The Redis url for defender. 
-"""
-DEFENDER_COOLOFF_TIME = 60
-""" integer: Period of inactivity after which old failed login attempts will be forgotten
-"""
-DEFENDER_LOGIN_FAILURE_LIMIT = 3
-""" integer: The number of login attempts allowed before a record is created for the failed login.
-"""
-DEFENDER_STORE_ACCESS_ATTEMPTS = True
-""" boolean: Store the login attempt to the database.
-"""
-DEFENDER_USE_CELERY = True
-""" boolean: Use Celery to store the login attempt to the database.
-"""
-DEFENDER_LOCKOUT_URL = "/locked"
-""" string: url to the defender error page (defined in core_main_registry_app)
-"""
-OAI_ENABLE_HARVESTING = True
-""" boolean: Enable OAI-PMH harvesting by default.
-"""
-DISPLAY_PRIVACY_POLICY_FOOTER = True
-""" boolean: display the privacy policy link in the footer
-"""
-DISPLAY_TERMS_OF_USE_FOOTER = True
-""" boolean: display the terms of use link in the footer
-"""
-DISPLAY_CONTACT_FOOTER = True
-""" boolean: display the contact link in the footer
-"""
-DISPLAY_HELP_FOOTER = True
-""" boolean: display the help link in the footer
-"""
-DISPLAY_RULES_OF_BEHAVIOR_FOOTER = True
-""" boolean: display the rules of behavior link in the footer
-"""
-
-ID_PROVIDER_SYSTEMS = {
-    "local": {
-        "class": "core_linked_records_app.utils.providers.local.LocalIdProvider",
-        "args": [SERVER_URI],
-    },
-}
-""" dict: provider systems available for registring PIDs
-"""
-
-ID_PROVIDER_PREFIXES = ["cdcs"]
-""" list<string>: accepted prefixes if manually specifying PIDs (first item is the
-default prefix)
-"""
-
-PID_XPATH = "Resource.@localid"
-""" string: location of the PID in the document, specified as dot notation
-"""
-
-AUTO_SET_PID = True
-""" boolean: enable the automatic pid generation for saved data.
-"""

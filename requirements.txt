@@ -5,3 +5,4 @@ Django==2.2.13
 mongoengine==0.18.2
 django-cors-headers==3.4.0
 django-saml2-auth==2.2.1
+whitenoise==5.2.0
