@@ -11,9 +11,13 @@ To install and run the WIPP Registry on your machine, please follow installation
 
 - Recommended Internet Browser: Google Chrome/Safari.
 
-## Docker Deployment (recommended)
+## Docker Deployment 
 To build and deploy Docker containers for the WIPP Registry, please refer to the following repository:
 https://github.com/usnistgov/WIPP-Registry-docker
+
+## Kubernetes Deployment 
+To deploy the WIPP Registry in a Kubernetes cluster, please refer to the following repository:
+https://github.com/usnistgov/WIPP-Registry-k8s
 
 ## Disclaimer
 
