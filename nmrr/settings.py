@@ -33,6 +33,7 @@ ALLOWED_HOSTS = (
 )
 
 # Databases
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -48,6 +49,8 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 MONGO_HOST = os.environ["MONGO_HOST"] if "MONGO_HOST" in os.environ else ""
 MONGO_PORT = os.environ["MONGO_PORT"] if "MONGO_PORT" in os.environ else "27017"
 MONGO_DB = os.environ["MONGO_DB"] if "MONGO_DB" in os.environ else ""
@@ -56,7 +59,7 @@ MONGO_PASS = os.environ["MONGO_PASS"] if "MONGO_PASS" in os.environ else ""
 MONGODB_URI = (
     f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
 )
-connect(MONGO_DB, host=MONGODB_URI)
+connect(host=MONGODB_URI, connect=False)
 
 
 BROKER_TRANSPORT_OPTIONS = {
@@ -74,6 +77,7 @@ else:
     REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
 BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
+CELERYBEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Application definition
 
@@ -93,6 +97,7 @@ INSTALLED_APPS = (
     "tz_detect",
     "defender",
     "captcha",
+    "django_celery_beat",
     "corsheaders",
     # Core apps
     "core_main_app",
@@ -498,3 +503,37 @@ if ENABLE_SAML2_SSO_AUTH:
     # Configure Pysaml2
     SAML_CONFIG = load_saml_config_from_env(server_uri=SERVER_URI, base_dir=BASE_DIR)
     SAML_ACS_FAILURE_RESPONSE_FUNCTION = "core_main_app.views.user.views.saml2_failure"
+
+# configure handle server PIDs according to environment settings
+if ENABLE_HANDLE_PID:
+    HDL_USER = (
+        f"300%3A{ID_PROVIDER_PREFIX_DEFAULT}/"
+        f'{os.getenv("HANDLE_NET_USER", "ADMIN")}'
+    )
+
+    ID_PROVIDER_SYSTEM_NAME = "handle.net"
+    ID_PROVIDER_SYSTEM_CONFIG = {
+        "class": "core_linked_records_app.utils.providers.handle_net.HandleNetSystem",
+        "args": [
+            os.getenv("HANDLE_NET_LOOKUP_URL", "https://hdl.handle.net"),
+            os.getenv("HANDLE_NET_REGISTRATION_URL", "https://handle-net.domain"),
+            HDL_USER,
+            os.getenv("HANDLE_NET_SECRET_KEY", "admin"),
+        ],
+    }
+
+    HANDLE_NET_RECORD_INDEX = os.getenv("HANDLE_NET_RECORD_INDEX", 1)
+    HANDLE_NET_ADMIN_DATA = {
+        "index": int(os.getenv("HANDLE_NET_ADMIN_INDEX", 100)),
+        "type": os.getenv("HANDLE_NET_ADMIN_TYPE", "HS_ADMIN"),
+        "data": {
+            "format": os.getenv("HANDLE_NET_ADMIN_DATA_FORMAT", "admin"),
+            "value": {
+                "handle": f"0.NA/{ID_PROVIDER_PREFIX_DEFAULT}",
+                "index": int(os.getenv("HANDLE_NET_ADMIN_DATA_INDEX", 200)),
+                "permissions": os.getenv(
+                    "HANDLE_NET_ADMIN_DATA_PERMISSIONS", "011111110011"
+                ),
+            },
+        },
+    }
