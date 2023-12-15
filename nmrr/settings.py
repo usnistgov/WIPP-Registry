@@ -87,9 +87,8 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     # Extra apps
     "rest_framework",
-    "drf_yasg",
+    "drf_spectacular",
     "menu",
-    "tz_detect",
     "defender",
     "captcha",
     "django_celery_beat",
@@ -136,7 +135,7 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "tz_detect.middleware.TimezoneMiddleware",
+    "core_main_app.middleware.timezone.TimezoneMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
@@ -166,11 +165,11 @@ WSGI_APPLICATION = "nmrr.wsgi.application"
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
+# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = os.getenv("TZ", "UTC")
 
 USE_I18N = True
 
@@ -181,7 +180,7 @@ USE_TZ = True
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static.prod"
@@ -193,10 +192,10 @@ STATICFILES_FINDERS = (
 
 STATICFILES_DIRS = ("static",)
 
-# https://docs.djangoproject.com/en/3.2/topics/files/
+# https://docs.djangoproject.com/en/4.2/topics/files/
 MEDIA_ROOT = "media"
 
-# https://docs.djangoproject.com/en/3.2/ref/contrib/sites/
+# https://docs.djangoproject.com/en/4.2/ref/contrib/sites/
 SITE_ID = 1
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -256,24 +255,18 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# drf-yasg
-SWAGGER_SETTINGS = {
-    "exclude_namespaces": [],  # List URL namespaces to ignore
-    "api_version": "1.1",  # Specify your API's version
-    "api_path": "/",  # Specify the path to your API not a root level
-    "enabled_methods": [  # Specify which methods to enable in Swagger UI
-        "get",
-        "post",
-        "put",
-        "patch",
-        "delete",
-    ],
-    "api_key": "",  # An API key
-    "is_authenticated": False,  # Set to True to enforce user authentication,
-    "is_superuser": False,  # Set to True to enforce admin only access
-    "LOGOUT_URL": "core_main_app_logout",
+# drf-spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": WEBSITE_SHORT_TITLE,  # noqa: F405 (core setting)
+    "DESCRIPTION": os.getenv(
+        "PROJECT_DESCRIPTION", "Your project description"
+    ),
+    "VERSION": PROJECT_VERSION,  # noqa: F405 (core setting)
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Django Defender
@@ -560,3 +553,8 @@ if ENABLE_HANDLE_PID:  # noqa: F405 (core setting)
     }
 
 LOGIN_URL = "core_main_app_login"
+
+# Default view for Django Exception Reports
+DEFAULT_EXCEPTION_REPORTER_FILTER = (
+    "core_main_app.views.admin.views.CustomExceptionReporter"
+)
