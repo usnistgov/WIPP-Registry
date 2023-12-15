@@ -16,10 +16,15 @@ from django.conf.urls import include
 from django.contrib import admin
 from django.urls import re_path
 
+from core_main_app.admin import core_admin_site
 from core_parser_app.tools.modules.discover import discover_modules
+
+admin.autodiscover()
+
 
 urlpatterns = [
     re_path(r"^admin/", admin.site.urls),
+    re_path(r"^core-admin/", core_admin_site.urls),
     re_path(r"^admin/defender/", include("defender.urls")),
     re_path(r"^", include("core_main_registry_app.urls")),
     re_path(r"^home/", include("nmrr_home.urls")),
@@ -28,7 +33,9 @@ urlpatterns = [
     re_path(r"^curate/", include("core_curate_registry_app.urls")),
     re_path(r"^parser/", include("core_parser_app.urls")),
     re_path(r"^explore/common/", include("core_explore_common_app.urls")),
-    re_path(r"^explore/keyword/", include("core_explore_keyword_registry_app.urls")),
+    re_path(
+        r"^explore/keyword/", include("core_explore_keyword_registry_app.urls")
+    ),
     re_path(r"^oaipmh_search/", include("core_explore_oaipmh_app.urls")),
     re_path(r"^dashboard/", include("core_dashboard_registry_app.urls")),
     re_path(r"^oai_pmh/", include("core_oaipmh_harvester_app.urls")),

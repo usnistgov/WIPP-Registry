@@ -7,29 +7,32 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-from .core_settings import *
-import os
 
-from mongoengine.connection import connect
+import os  # noqa
 
 from core_main_app.utils.logger.logger_utils import (
     set_generic_handler,
     set_generic_logger,
     update_logger_with_local_app,
 )
+from .core_settings import *  # noqa: F403
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = (
-    os.environ["DJANGO_SECRET_KEY"] if "DJANGO_SECRET_KEY" in os.environ else None
+    os.environ["DJANGO_SECRET_KEY"]
+    if "DJANGO_SECRET_KEY" in os.environ
+    else None
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = (
-    os.environ["ALLOWED_HOSTS"].split(",") if "ALLOWED_HOSTS" in os.environ else []
+    os.environ["ALLOWED_HOSTS"].split(",")
+    if "ALLOWED_HOSTS" in os.environ
+    else []
 )
 
 # Databases
@@ -37,30 +40,23 @@ ALLOWED_HOSTS = (
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": os.environ["POSTGRES_HOST"] if "POSTGRES_HOST" in os.environ else None,
+        "HOST": os.environ["POSTGRES_HOST"]
+        if "POSTGRES_HOST" in os.environ
+        else None,
         "PORT": int(os.environ["POSTGRES_PORT"])
         if "POSTGRES_PORT" in os.environ
         else 5432,
-        "NAME": os.environ["POSTGRES_DB"] if "POSTGRES_DB" in os.environ else None,
-        "USER": os.environ["POSTGRES_USER"] if "POSTGRES_USER" in os.environ else None,
+        "NAME": os.environ["POSTGRES_DB"]
+        if "POSTGRES_DB" in os.environ
+        else None,
+        "USER": os.environ["POSTGRES_USER"]
+        if "POSTGRES_USER" in os.environ
+        else None,
         "PASSWORD": os.environ["POSTGRES_PASS"]
         if "POSTGRES_PASS" in os.environ
         else None,
     }
 }
-
-DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-
-MONGO_HOST = os.environ["MONGO_HOST"] if "MONGO_HOST" in os.environ else ""
-MONGO_PORT = os.environ["MONGO_PORT"] if "MONGO_PORT" in os.environ else "27017"
-MONGO_DB = os.environ["MONGO_DB"] if "MONGO_DB" in os.environ else ""
-MONGO_USER = os.environ["MONGO_USER"] if "MONGO_USER" in os.environ else ""
-MONGO_PASS = os.environ["MONGO_PASS"] if "MONGO_PASS" in os.environ else ""
-MONGODB_URI = (
-    f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}"
-)
-connect(host=MONGODB_URI, connect=False)
-
 
 BROKER_TRANSPORT_OPTIONS = {
     "visibility_timeout": 3600,
@@ -91,13 +87,12 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     # Extra apps
     "rest_framework",
-    "drf_yasg",
-    "rest_framework_mongoengine",
+    "drf_spectacular",
     "menu",
-    "tz_detect",
     "defender",
     "captcha",
     "django_celery_beat",
+    "fontawesomefree",
     "corsheaders",
     # Core apps
     "core_main_app",
@@ -140,7 +135,7 @@ MIDDLEWARE = (
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "tz_detect.middleware.TimezoneMiddleware",
+    "core_main_app.middleware.timezone.TimezoneMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
@@ -170,11 +165,11 @@ WSGI_APPLICATION = "nmrr.wsgi.application"
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
+# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = os.getenv("TZ", "UTC")
 
 USE_I18N = True
 
@@ -185,7 +180,7 @@ USE_TZ = True
 LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "static.prod"
@@ -196,6 +191,14 @@ STATICFILES_FINDERS = (
 )
 
 STATICFILES_DIRS = ("static",)
+
+# https://docs.djangoproject.com/en/4.2/topics/files/
+MEDIA_ROOT = "media"
+
+# https://docs.djangoproject.com/en/4.2/ref/contrib/sites/
+SITE_ID = 1
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Password Validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -252,30 +255,23 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-# drf-yasg
-SWAGGER_SETTINGS = {
-    "exclude_namespaces": [],  # List URL namespaces to ignore
-    "api_version": "1.1",  # Specify your API's version
-    "api_path": "/",  # Specify the path to your API not a root level
-    "enabled_methods": [  # Specify which methods to enable in Swagger UI
-        "get",
-        "post",
-        "put",
-        "patch",
-        "delete",
-    ],
-    "api_key": "",  # An API key
-    "is_authenticated": False,  # Set to True to enforce user authentication,
-    "is_superuser": False,  # Set to True to enforce admin only access
-    "LOGIN_URL": "core_main_app_login",
-    "LOGOUT_URL": "core_main_app_logout",
+# drf-spectacular
+SPECTACULAR_SETTINGS = {
+    "TITLE": WEBSITE_SHORT_TITLE,  # noqa: F405 (core setting)
+    "DESCRIPTION": os.getenv(
+        "PROJECT_DESCRIPTION", "Your project description"
+    ),
+    "VERSION": PROJECT_VERSION,  # noqa: F405 (core setting)
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
 
 # Django Defender
 DEFENDER_REDIS_URL = REDIS_URL
-""" :py:class:`str`: The Redis url for defender. 
+""" :py:class:`str`: The Redis url for defender.
 """
 DEFENDER_COOLOFF_TIME = 60
 """ integer: Period of inactivity after which old failed login attempts will be forgotten
@@ -375,7 +371,10 @@ if LOGGING_CLIENT:
         "logging.handlers.RotatingFileHandler",
     )
     set_generic_logger(
-        LOGGING, "django.template", LOGGER_CLIENT_LEVEL, ["console", "logfile-template"]
+        LOGGING,
+        "django.template",
+        LOGGER_CLIENT_LEVEL,
+        ["console", "logfile-template"],
     )
     set_generic_handler(
         LOGGING,
@@ -387,7 +386,10 @@ if LOGGING_CLIENT:
         "logging.handlers.RotatingFileHandler",
     )
     set_generic_logger(
-        LOGGING, "django.request", LOGGER_CLIENT_LEVEL, ["console", "logfile-request"]
+        LOGGING,
+        "django.request",
+        LOGGER_CLIENT_LEVEL,
+        ["console", "logfile-request"],
     )
 
 if LOGGING_SERVER:
@@ -401,7 +403,10 @@ if LOGGING_SERVER:
         "logging.handlers.RotatingFileHandler",
     )
     set_generic_logger(
-        LOGGING, "django.server", LOGGER_SERVER_LEVEL, ["console", "logfile-server"]
+        LOGGING,
+        "django.server",
+        LOGGER_SERVER_LEVEL,
+        ["console", "logfile-server"],
     )
 
 if LOGGING_DB:
@@ -423,7 +428,7 @@ if LOGGING_DB:
 
 # SSL
 
-if SERVER_URI.lower().startswith("https"):
+if SERVER_URI.lower().startswith("https"):  # noqa: F405 (core setting)
     # Activate HTTPS
     os.environ["HTTPS"] = "on"
 
@@ -464,7 +469,8 @@ if MONITORING_SERVER_URI:
         TEMPLATES[0]["OPTIONS"]["context_processors"].append(
             "elasticapm.contrib.django.context_processors.rum_tracing"
         )
-if ENABLE_SAML2_SSO_AUTH:
+
+if ENABLE_SAML2_SSO_AUTH:  # noqa: F405 (core setting)
     import saml2
     import saml2.saml
     from core_main_app.utils.saml2.utils import (
@@ -476,7 +482,9 @@ if ENABLE_SAML2_SSO_AUTH:
     if "djangosaml2" not in INSTALLED_APPS:
         INSTALLED_APPS = INSTALLED_APPS + ("djangosaml2",)
     if "djangosaml2.middleware.SamlSessionMiddleware" not in MIDDLEWARE:
-        MIDDLEWARE = MIDDLEWARE + ("djangosaml2.middleware.SamlSessionMiddleware",)
+        MIDDLEWARE = MIDDLEWARE + (
+            "djangosaml2.middleware.SamlSessionMiddleware",
+        )
     AUTHENTICATION_BACKENDS = (
         "django.contrib.auth.backends.ModelBackend",
         "djangosaml2.backends.Saml2Backend",
@@ -501,13 +509,17 @@ if ENABLE_SAML2_SSO_AUTH:
     SAML_ATTRIBUTE_MAPPING = load_django_attribute_map_from_env()
 
     # Configure Pysaml2
-    SAML_CONFIG = load_saml_config_from_env(server_uri=SERVER_URI, base_dir=BASE_DIR)
-    SAML_ACS_FAILURE_RESPONSE_FUNCTION = "core_main_app.views.user.views.saml2_failure"
+    SAML_CONFIG = load_saml_config_from_env(
+        server_uri=SERVER_URI, base_dir=BASE_DIR  # noqa: F405 (core setting)
+    )
+    SAML_ACS_FAILURE_RESPONSE_FUNCTION = (
+        "core_main_app.views.user.views.saml2_failure"
+    )
 
 # configure handle server PIDs according to environment settings
-if ENABLE_HANDLE_PID:
+if ENABLE_HANDLE_PID:  # noqa: F405 (core setting)
     HDL_USER = (
-        f"300%3A{ID_PROVIDER_PREFIX_DEFAULT}/"
+        f"300%3A{ID_PROVIDER_PREFIX_DEFAULT}/"  # noqa: F405 (core setting)
         f'{os.getenv("HANDLE_NET_USER", "ADMIN")}'
     )
 
@@ -516,7 +528,9 @@ if ENABLE_HANDLE_PID:
         "class": "core_linked_records_app.utils.providers.handle_net.HandleNetSystem",
         "args": [
             os.getenv("HANDLE_NET_LOOKUP_URL", "https://hdl.handle.net"),
-            os.getenv("HANDLE_NET_REGISTRATION_URL", "https://handle-net.domain"),
+            os.getenv(
+                "HANDLE_NET_REGISTRATION_URL", "https://handle-net.domain"
+            ),
             HDL_USER,
             os.getenv("HANDLE_NET_SECRET_KEY", "admin"),
         ],
@@ -529,7 +543,7 @@ if ENABLE_HANDLE_PID:
         "data": {
             "format": os.getenv("HANDLE_NET_ADMIN_DATA_FORMAT", "admin"),
             "value": {
-                "handle": f"0.NA/{ID_PROVIDER_PREFIX_DEFAULT}",
+                "handle": f"0.NA/{ID_PROVIDER_PREFIX_DEFAULT}",  # noqa: F405 (core setting)
                 "index": int(os.getenv("HANDLE_NET_ADMIN_DATA_INDEX", 200)),
                 "permissions": os.getenv(
                     "HANDLE_NET_ADMIN_DATA_PERMISSIONS", "011111110011"
@@ -537,3 +551,10 @@ if ENABLE_HANDLE_PID:
             },
         },
     }
+
+LOGIN_URL = "core_main_app_login"
+
+# Default view for Django Exception Reports
+DEFAULT_EXCEPTION_REPORTER_FILTER = (
+    "core_main_app.views.admin.views.CustomExceptionReporter"
+)
