@@ -8,7 +8,7 @@ load_dotenv()
 
 from .settings import *  # noqa
 
-
+# Run in debug mode in development
 DEBUG = True
 
 DATABASES = {
@@ -18,8 +18,15 @@ DATABASES = {
     }
 }
 
+# Remove constraint checks on passwords
 AUTH_PASSWORD_VALIDATORS = []
+
 # Disable async mongo updates
 MONGODB_ASYNC_SAVE = False
 # Enable captcha test mode (use PASSED)
 CAPTCHA_TEST_MODE = True
+
+# Django Allauth dev settings
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = True
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+ACCOUNT_EMAIL_VERIFICATION = "none"
