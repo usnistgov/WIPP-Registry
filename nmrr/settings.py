@@ -40,21 +40,29 @@ ALLOWED_HOSTS = (
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": os.environ["POSTGRES_HOST"]
-        if "POSTGRES_HOST" in os.environ
-        else None,
-        "PORT": int(os.environ["POSTGRES_PORT"])
-        if "POSTGRES_PORT" in os.environ
-        else 5432,
-        "NAME": os.environ["POSTGRES_DB"]
-        if "POSTGRES_DB" in os.environ
-        else None,
-        "USER": os.environ["POSTGRES_USER"]
-        if "POSTGRES_USER" in os.environ
-        else None,
-        "PASSWORD": os.environ["POSTGRES_PASS"]
-        if "POSTGRES_PASS" in os.environ
-        else None,
+        "HOST": (
+            os.environ["POSTGRES_HOST"]
+            if "POSTGRES_HOST" in os.environ
+            else None
+        ),
+        "PORT": (
+            int(os.environ["POSTGRES_PORT"])
+            if "POSTGRES_PORT" in os.environ
+            else 5432
+        ),
+        "NAME": (
+            os.environ["POSTGRES_DB"] if "POSTGRES_DB" in os.environ else None
+        ),
+        "USER": (
+            os.environ["POSTGRES_USER"]
+            if "POSTGRES_USER" in os.environ
+            else None
+        ),
+        "PASSWORD": (
+            os.environ["POSTGRES_PASS"]
+            if "POSTGRES_PASS" in os.environ
+            else None
+        ),
     }
 }
 
@@ -87,9 +95,9 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     # Extra apps
     "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     "menu",
-    "defender",
     "captcha",
     "django_celery_beat",
     "fontawesomefree",
@@ -131,12 +139,10 @@ MIDDLEWARE = (
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "defender.middleware.FailedLoginMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "core_main_app.middleware.timezone.TimezoneMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -252,8 +258,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Django REST Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -268,26 +274,6 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAuthenticated"],
 }
-
-# Django Defender
-DEFENDER_REDIS_URL = REDIS_URL
-""" :py:class:`str`: The Redis url for defender.
-"""
-DEFENDER_COOLOFF_TIME = 60
-""" integer: Period of inactivity after which old failed login attempts will be forgotten
-"""
-DEFENDER_LOGIN_FAILURE_LIMIT = 3
-""" integer: The number of login attempts allowed before a record is created for the failed login.
-"""
-DEFENDER_STORE_ACCESS_ATTEMPTS = True
-""" boolean: Store the login attempt to the database.
-"""
-DEFENDER_USE_CELERY = True
-""" boolean: Use Celery to store the login attempt to the database.
-"""
-DEFENDER_LOCKOUT_URL = "/locked"
-""" string: url to the defender error page (defined in core_main_registry_app)
-"""
 
 # Django simple-menu
 MENU_SELECT_PARENTS = False
@@ -442,34 +428,30 @@ if SERVER_URI.lower().startswith("https"):  # noqa: F405 (core setting)
     # Set x-frame options
     X_FRAME_OPTIONS = "SAMEORIGIN"
 
-# APM
-MONITORING_SERVER_URI = os.environ["MONITORING_SERVER_URI"] if "MONITORING_SERVER_URI" in os.environ else None
-if MONITORING_SERVER_URI:
-    ELASTIC_APM = {
-        "SERVICE_NAME": os.environ["SERVER_NAME"],
-        "SERVER_URL": MONITORING_SERVER_URI,
-        # Use if APM Server requires a token
-        # 'SECRET_TOKEN': '',
-    }
-    if "elasticapm.contrib.django" not in INSTALLED_APPS:
-        INSTALLED_APPS = INSTALLED_APPS + ("elasticapm.contrib.django",)
-    if "elasticapm.contrib.django.middleware.TracingMiddleware" not in MIDDLEWARE:
-        # Make sure that it is the first middleware in the list.
-        MIDDLEWARE = (
-            "elasticapm.contrib.django.middleware.TracingMiddleware",
-        ) + MIDDLEWARE
-    if "elasticapm.errors" not in LOGGING["loggers"]:
-        # https://www.elastic.co/guide/en/apm/agent/python/current/django-support.html#django-logging
-        # Log errors from the Elastic APM module to the console (recommended)
-        set_generic_logger(LOGGING, "elasticapm.errors", "ERROR", ["console"])
-    if (
-        "elasticapm.contrib.django.context_processors.rum_tracing"
-        not in TEMPLATES[0]["OPTIONS"]["context_processors"]
-    ):
-        TEMPLATES[0]["OPTIONS"]["context_processors"].append(
-            "elasticapm.contrib.django.context_processors.rum_tracing"
-        )
+if "defender" not in INSTALLED_APPS:
+    INSTALLED_APPS = INSTALLED_APPS + ("defender",)
 
+if "defender.middleware.FailedLoginMiddleware" not in MIDDLEWARE:
+    MIDDLEWARE = MIDDLEWARE + ("defender.middleware.FailedLoginMiddleware",)
+# Django Defender
+DEFENDER_REDIS_URL = REDIS_URL
+""" :py:class:`str`: The Redis url for defender.
+"""
+DEFENDER_COOLOFF_TIME = 60
+""" integer: Period of inactivity after which old failed login attempts will be forgotten
+"""
+DEFENDER_LOGIN_FAILURE_LIMIT = 3
+""" integer: The number of login attempts allowed before a record is created for the failed login.
+"""
+DEFENDER_STORE_ACCESS_ATTEMPTS = True
+""" boolean: Store the login attempt to the database.
+"""
+DEFENDER_USE_CELERY = True
+""" boolean: Use Celery to store the login attempt to the database.
+"""
+DEFENDER_LOCKOUT_URL = "/locked"
+""" string: url to the defender error page (defined in core_main_app)
+"""
 if ENABLE_SAML2_SSO_AUTH:  # noqa: F405 (core setting)
     import saml2
     import saml2.saml
@@ -510,7 +492,8 @@ if ENABLE_SAML2_SSO_AUTH:  # noqa: F405 (core setting)
 
     # Configure Pysaml2
     SAML_CONFIG = load_saml_config_from_env(
-        server_uri=SERVER_URI, base_dir=BASE_DIR  # noqa: F405 (core setting)
+        server_uri=SERVER_URI,  # noqa: F405 (core setting)
+        base_dir=BASE_DIR,  # noqa: F405 (core setting)
     )
     SAML_ACS_FAILURE_RESPONSE_FUNCTION = (
         "core_main_app.views.user.views.saml2_failure"
