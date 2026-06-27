@@ -1,4 +1,4 @@
-/* Bootstrap overide */
+/* Bootstrap override */
 .btn.btn-primary {
     background-color: #007ac1 !important;
     border-color: #565656;
@@ -62,10 +62,10 @@
     visibility: hidden;
     height: 0em;
 }
-/* End Bootstrap overide */
+/* End Bootstrap override */
 
-/* Fontawesome overide */
+/* Fontawesome override */
 .fas span {
     font-family: 'Source Sans Pro', sans-serif !important;
 }
-/* End fontawesome overide */
+/* End fontawesome override */

@@ -21,7 +21,7 @@ https://github.com/usnistgov/WIPP-Registry-k8s
 
 [NIST Software Disclaimer](https://www.nist.gov/disclaimer)
 
-Note: The XML-based schemas provided with the WIPP Registry do not represent “standard” metadata representations and are specifically release as “as is,” and as such the National Institute of Standards and Technology (NIST) makes no warrant of any kind on the correctness or accuracy of the content of the schemas, nor the fitness of the schemas for any purpose and accepts any liability or responsibility for the consequences of the schemas use or misuse by anyone. 
+Note: The XML-based schemas provided with the WIPP Registry do not represent “standard” metadata representations and are specifically released as “as is,” and as such the National Institute of Standards and Technology (NIST) makes no warrant of any kind on the correctness or accuracy of the content of the schemas, nor the fitness of the schemas for any purpose and accepts any liability or responsibility for the consequences of the schemas use or misuse by anyone. 
 
 
 ## Known Issues
